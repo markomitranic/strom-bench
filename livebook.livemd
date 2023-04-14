@@ -1,0 +1,121 @@
+# StromBench
+
+```elixir
+Mix.install([
+  {:jason, "~> 1.4"},
+  {:vega_lite, "~> 0.1.6"},
+  {:kino_vega_lite, "~> 0.1.7"}
+])
+
+alias VegaLite, as: Vl
+alias Jason
+```
+
+## Intro
+
+```elixir
+dirname = "/Users/me/Sites/personal/energy_efficiency/recordings/raw/general/"
+
+sets =
+  dirname
+  |> File.ls!()
+  |> Enum.reject(fn n -> n === ".DS_Store" end)
+  |> Enum.map(fn filename ->
+    "#{dirname}/#{filename}"
+    |> File.read!()
+    |> String.trim()
+    |> String.split("\n")
+    |> Enum.with_index(1)
+    |> Enum.map(fn {line, i} ->
+      line
+      |> String.split(", ")
+      |> Enum.map(fn val -> val |> Integer.parse() |> elem(0) end)
+      |> then(fn [timestamp, value] -> %{"timestamp" => timestamp, "mW" => value} end)
+      |> Map.put(
+        "label",
+        case Path.rootname(filename) do
+          "arc" -> "Arc"
+          "brave" -> "Brave"
+          "chrome" -> "Chrome"
+          "edge" -> "Edge"
+          "firefox" -> "Firefox"
+          "opera" -> "Opera"
+          "orion-low" -> "Orion (Low Power)"
+          "orion" -> "Orion"
+          "safari" -> "Safari"
+          "safari-promotion" -> "Safari (no fps cap)"
+          filename -> filename
+        end
+      )
+      |> Map.put("seconds", i)
+    end)
+    |> then(fn set -> {filename, set} end)
+  end)
+  |> Enum.into(%{})
+  |> Enum.reduce([], fn {_, set}, acc -> set ++ acc end)
+```
+
+We now group the seconds values to the approximate periods that different actions occur at within our tests. These are based on the original run.
+
+```elixir
+sets =
+  sets
+  |> Enum.map(fn %{"seconds" => seconds} = map ->
+    action_type =
+      case seconds do
+        t when t < 20 -> "01. Open Notion"
+        t when t < 1 * 60 + 10 -> "02. Speedtest"
+        t when t < 2 * 60 -> "03. Speedometer"
+        t when t < 8 * 60 + 20 -> "04. 2k HDR YouTube"
+        t when t < 8 * 60 + 50 -> "05. Play Dave2D in PiP"
+        t when t < 9 * 60 + 45 -> "06. Read Drazevac"
+        t when t < 11 * 60 + 45 -> "07. Apartment Search"
+        t when t < 13 * 60 + 40 -> "08. Google Maps"
+        t when t < 14 * 60 + 38 -> "09. Pinterest"
+        t when t < 15 * 60 + 40 -> "10. Sushi Wolt"
+        t when t < 16 * 60 + 12 -> "11. Look at TVs"
+        t when t < 17 * 60 + 32 -> "12. Read translated news"
+        _ -> nil
+      end
+
+    map |> Map.put("action", action_type)
+  end)
+```
+
+## Comparison Charts
+
+We've now calculated all the values, lets chart chart chart!
+
+```elixir
+Vl.new(width: 650, height: 300)
+|> Vl.data_from_values(sets)
+|> Vl.mark(:bar, tooltip: true)
+|> Vl.encode_field(:x, "label")
+|> Vl.encode_field(:color, "label")
+|> Vl.encode_field(:y, "mW", aggregate: :sum)
+```
+
+```elixir
+Vl.new(width: 250, height: 250)
+|> Vl.data_from_values(sets)
+|> Vl.transform(filter: "datum.action")
+|> Vl.encode_field(:color, "label")
+|> Vl.mark(:bar, tooltip: true)
+|> Vl.encode_field(:x, "label")
+|> Vl.encode_field(:y, "mW", aggregate: :sum)
+|> Vl.encode_field(:facet, "action",
+  type: :ordinal,
+  columns: 3,
+  sort: [field: "action", order: :ascending]
+)
+```
+
+```elixir
+Vl.new(width: 950, height: 400)
+|> Vl.data_from_values(sets)
+|> Vl.transform(filter: "datum.action")
+|> Vl.mark(:bar, tooltip: true)
+|> Vl.encode_field(:y, "label")
+|> Vl.encode_field(:x, "mW", aggregate: :sum, sort: [field: "action", order: :ascending])
+|> Vl.encode_field(:color, "action")
+```

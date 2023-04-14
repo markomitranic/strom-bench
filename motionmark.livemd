@@ -1,0 +1,131 @@
+<!-- livebook:{"persist_outputs":true} -->
+
+# StromBench - MotionMark
+
+```elixir
+Mix.install([
+  {:jason, "~> 1.4"},
+  {:vega_lite, "~> 0.1.6"},
+  {:kino_vega_lite, "~> 0.1.7"}
+])
+
+alias VegaLite, as: Vl
+alias Jason
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+Jason
+```
+
+## Intro
+
+The point of this test is purely to ensure that we are in fact seeing fairly stabile values when nothing is happening on the laptop.
+
+## Transform the data
+
+```elixir
+dirname = "/Users/me/Sites/personal/energy_efficiency/recordings/raw/motionmark/"
+
+sets =
+  dirname
+  |> File.ls!()
+  |> Enum.map(fn filename ->
+    set =
+      "#{dirname}/#{filename}"
+      |> File.read!()
+      |> String.trim()
+      |> String.split("\n")
+      |> Enum.with_index(1)
+      |> Enum.map(fn {line, i} ->
+        line
+        |> String.split(", ")
+        |> Enum.map(fn val -> Integer.parse(val) |> elem(0) end)
+        |> then(fn [timestamp, value] -> %{"timestamp" => timestamp, "mW" => value} end)
+        |> Map.put("label", Path.rootname(filename))
+        |> Map.put("index", i)
+      end)
+
+    {filename, set}
+  end)
+  |> Enum.into(%{})
+  |> Enum.reduce([], fn {_, set}, acc -> set ++ acc end)
+```
+
+<!-- livebook:{"output":true} -->
+
+```
+[
+  %{"index" => 1, "label" => "safari", "mW" => 267, "timestamp" => 1681393692},
+  %{"index" => 2, "label" => "safari", "mW" => 80, "timestamp" => 1681393693},
+  %{"index" => 3, "label" => "safari", "mW" => 12, "timestamp" => 1681393694},
+  %{"index" => 4, "label" => "safari", "mW" => 541, "timestamp" => 1681393695},
+  %{"index" => 5, "label" => "safari", "mW" => 362, "timestamp" => 1681393696},
+  %{"index" => 6, "label" => "safari", "mW" => 330, "timestamp" => 1681393697},
+  %{"index" => 7, "label" => "safari", "mW" => 187, "timestamp" => 1681393698},
+  %{"index" => 8, "label" => "safari", "mW" => 176, "timestamp" => 1681393699},
+  %{"index" => 9, "label" => "safari", "mW" => 176, "timestamp" => 1681393700},
+  %{"index" => 10, "label" => "safari", "mW" => 85, "timestamp" => 1681393701},
+  %{"index" => 11, "label" => "safari", "mW" => 72, "timestamp" => 1681393702},
+  %{"index" => 12, "label" => "safari", "mW" => 70, "timestamp" => 1681393703},
+  %{"index" => 13, "label" => "safari", "mW" => 99, "timestamp" => 1681393704},
+  %{"index" => 14, "label" => "safari", "mW" => 93, "timestamp" => 1681393705},
+  %{"index" => 15, "label" => "safari", "mW" => 88, "timestamp" => 1681393706},
+  %{"index" => 16, "label" => "safari", "mW" => 87, "timestamp" => 1681393707},
+  %{"index" => 17, "label" => "safari", "mW" => 84, "timestamp" => 1681393708},
+  %{"index" => 18, "label" => "safari", "mW" => 78, "timestamp" => 1681393709},
+  %{"index" => 19, "label" => "safari", "mW" => 95, "timestamp" => 1681393710},
+  %{"index" => 20, "label" => "safari", "mW" => 88, "timestamp" => 1681393711},
+  %{"index" => 21, "label" => "safari", "mW" => 78, "timestamp" => 1681393712},
+  %{"index" => 22, "label" => "safari", "mW" => 121, "timestamp" => 1681393713},
+  %{"index" => 23, "label" => "safari", "mW" => 77, "timestamp" => 1681393714},
+  %{"index" => 24, "label" => "safari", "mW" => 73, "timestamp" => 1681393715},
+  %{"index" => 25, "label" => "safari", "mW" => 74, "timestamp" => 1681393716},
+  %{"index" => 26, "label" => "safari", "mW" => 69, "timestamp" => 1681393717},
+  %{"index" => 27, "label" => "safari", "mW" => 71, "timestamp" => 1681393719},
+  %{"index" => 28, "label" => "safari", "mW" => 87, "timestamp" => 1681393720},
+  %{"index" => 29, "label" => "safari", "mW" => 73, "timestamp" => 1681393721},
+  %{"index" => 30, "label" => "safari", "mW" => 71, "timestamp" => 1681393722},
+  %{"index" => 31, "label" => "safari", "mW" => 73, "timestamp" => 1681393723},
+  %{"index" => 32, "label" => "safari", "mW" => 78, "timestamp" => 1681393724},
+  %{"index" => 33, "label" => "safari", "mW" => 75, "timestamp" => 1681393725},
+  %{"index" => 34, "label" => "safari", "mW" => 77, "timestamp" => 1681393726},
+  %{"index" => 35, "label" => "safari", "mW" => 71, "timestamp" => 1681393727},
+  %{"index" => 36, "label" => "safari", "mW" => 72, "timestamp" => 1681393728},
+  %{"index" => 37, "label" => "safari", "mW" => 1221, "timestamp" => 1681393729},
+  %{"index" => 38, "label" => "safari", "mW" => 94, "timestamp" => 1681393730},
+  %{"index" => 39, "label" => "safari", "mW" => 94, "timestamp" => 1681393731},
+  %{"index" => 40, "label" => "safari", "mW" => 103, "timestamp" => 1681393732},
+  %{"index" => 41, "label" => "safari", "mW" => 103, "timestamp" => 1681393733},
+  %{"index" => 42, "label" => "safari", "mW" => 96, "timestamp" => 1681393734},
+  %{"index" => 43, "label" => "safari", "mW" => 116, "timestamp" => 1681393735},
+  %{"index" => 44, "label" => "safari", "mW" => 92, "timestamp" => 1681393736},
+  %{"index" => 45, "label" => "safari", "mW" => 95, "timestamp" => 1681393737},
+  %{"index" => 46, "label" => "safari", "mW" => 93, "timestamp" => 1681393738},
+  %{"index" => 47, "label" => "safari", "mW" => 90, ...},
+  %{"index" => 48, "label" => "safari", ...},
+  %{"index" => 49, ...},
+  %{...},
+  ...
+]
+```
+
+```elixir
+Vl.new(width: 750, height: 250)
+|> Vl.data_from_values(sets)
+|> Vl.encode_field(:color, "label")
+|> Vl.mark(:bar, tooltip: true)
+|> Vl.encode_field(:x, "label")
+|> Vl.encode_field(:y, "mW", aggregate: :sum)
+```
+
+```elixir
+Vl.new(width: 750, height: 250)
+|> Vl.data_from_values(sets)
+|> Vl.encode_field(:color, "label")
+|> Vl.mark(:line, tooltip: true)
+|> Vl.encode_field(:x, "index", type: :temporal)
+|> Vl.encode_field(:y, "mW", type: :quantitative)
+|> Vl.encode_field(:color, "label", type: :nominal)
+```
