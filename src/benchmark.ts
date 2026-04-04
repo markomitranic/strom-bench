@@ -71,47 +71,63 @@ const html = `<!DOCTYPE html>
 <meta charset="utf-8">
 <title>StromBench — Benchmark</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwindcss.config = {
+  theme: {
+    extend: {
+      colors: {
+        dd: {
+          bg: '#131019',
+          surface: '#1a1625',
+          border: '#2c2541',
+          text: '#c5bfd6',
+          muted: '#7a7394',
+          accent: '#8b5cf6',
+        }
+      }
+    }
+  }
+}
+</script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #1a1a2e; color: #e0e0e0; font-family: system-ui, sans-serif; padding: 24px; padding-top: 72px; }
-  .toolbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: #0f0f23; border-bottom: 1px solid #2a2a4a; padding: 12px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
-  .toolbar h1 { font-size: 1.1rem; margin-right: 8px; white-space: nowrap; }
-  .toolbar label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; padding: 4px 10px; border-radius: 4px; transition: opacity 0.15s; }
-  .toolbar label:has(input:not(:checked)) { opacity: 0.4; }
-  .toolbar input[type="checkbox"] { accent-color: var(--color); }
-  h2 { font-size: 1.1rem; margin-bottom: 12px; color: #aaa; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-  .full { grid-column: 1 / -1; }
-  .chart-card { background: #16213e; border-radius: 8px; padding: 20px; }
-  .facet-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .facet-card { background: #16213e; border-radius: 8px; padding: 16px; }
-  .facet-card h3 { font-size: 0.85rem; color: #888; margin-bottom: 8px; }
+  .toggle-label:has(input:not(:checked)) { opacity: 0.35; }
+  .toggle-label input[type="checkbox"] { accent-color: var(--color); }
 </style>
 </head>
-<body>
-<div class="toolbar">
-  <h1>StromBench</h1>
-${loaded.map((r) => `  <label style="--color:${r.color}"><input type="checkbox" checked data-browser="${r.label}">${r.label}</label>`).join("\n")}
+<body class="bg-dd-bg text-dd-text font-mono text-xs leading-tight min-h-screen">
+
+<div class="fixed top-0 left-0 right-0 z-50 bg-dd-bg/95 backdrop-blur border-b border-dd-border px-4 py-2 flex items-center gap-3 flex-wrap">
+  <span class="text-sm font-bold text-white tracking-tight mr-2">StromBench</span>
+  <span class="w-px h-4 bg-dd-border"></span>
+${loaded.map((r) => `  <label class="toggle-label flex items-center gap-1.5 cursor-pointer px-1.5 py-0.5 transition-opacity" style="--color:${r.color}"><input type="checkbox" checked data-browser="${r.label}" class="w-3 h-3"><span>${r.label}</span></label>`).join("\n")}
 </div>
 
-<div class="grid">
-  <div class="chart-card">
-    <h2>Total Energy (mW·s)</h2>
-    <canvas id="barTotal"></canvas>
+<div class="pt-12 p-4 max-w-[1600px] mx-auto space-y-3">
+
+  <div class="grid grid-cols-2 gap-3">
+    <div class="bg-dd-surface border border-dd-border p-3">
+      <h2 class="text-[11px] uppercase tracking-widest text-dd-muted mb-2">Total Energy (mW·s)</h2>
+      <canvas id="barTotal"></canvas>
+    </div>
+    <div class="bg-dd-surface border border-dd-border p-3">
+      <h2 class="text-[11px] uppercase tracking-widest text-dd-muted mb-2">Average Power (mW)</h2>
+      <canvas id="barAvg"></canvas>
+    </div>
   </div>
-  <div class="chart-card">
-    <h2>Average Power (mW)</h2>
-    <canvas id="barAvg"></canvas>
-  </div>
-  <div class="chart-card full">
-    <h2>Power Over Time (mW)</h2>
+
+  <div class="bg-dd-surface border border-dd-border p-3">
+    <h2 class="text-[11px] uppercase tracking-widest text-dd-muted mb-2">Power Over Time (mW)</h2>
     <canvas id="lineAll"></canvas>
   </div>
-</div>
 
-<h2>Per Action Phase</h2>
-<div class="facet-grid">
-${phaseData.map((p, i) => `  <div class="facet-card"><h3>${p.name}</h3><canvas id="facet${i}"></canvas></div>`).join("\n")}
+  <div>
+    <h2 class="text-[11px] uppercase tracking-widest text-dd-muted mb-2">Per Action Phase</h2>
+    <div class="grid grid-cols-3 gap-3">
+${phaseData.map((p, i) => `      <div class="bg-dd-surface border border-dd-border p-3"><h3 class="text-[10px] uppercase tracking-wider text-dd-muted mb-1.5">${p.name}</h3><canvas id="facet${i}"></canvas></div>`).join("\n")}
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -126,6 +142,11 @@ const ALL_DATA = ${JSON.stringify(
 )};
 const ALL_PHASES = ${JSON.stringify(phaseData)};
 
+Chart.defaults.borderColor = '#2c2541';
+Chart.defaults.color = '#7a7394';
+Chart.defaults.font.family = 'ui-monospace, monospace';
+Chart.defaults.font.size = 10;
+
 const charts = {};
 const enabled = new Set(ALL_DATA.map(d => d.label));
 
@@ -136,8 +157,8 @@ function barOpts(title) {
     responsive: true,
     plugins: { legend: { display: false } },
     scales: {
-      x: { ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
-      y: { title: { display: true, text: title, color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } }
+      x: { ticks: { color: '#7a7394' }, grid: { color: '#2c2541' } },
+      y: { title: { display: true, text: title, color: '#7a7394' }, ticks: { color: '#7a7394' }, grid: { color: '#2c2541' } }
     }
   };
 }
@@ -148,26 +169,26 @@ function rebuild() {
 
   charts.barTotal = new Chart(document.getElementById('barTotal'), {
     type: 'bar',
-    data: { labels: vis.map(d => d.label), datasets: [{ data: vis.map(d => d.total), backgroundColor: vis.map(d => d.color) }] },
+    data: { labels: vis.map(d => d.label), datasets: [{ data: vis.map(d => d.total), backgroundColor: vis.map(d => d.color), borderRadius: 0 }] },
     options: barOpts('mW\\u00b7s')
   });
 
   charts.barAvg = new Chart(document.getElementById('barAvg'), {
     type: 'bar',
-    data: { labels: vis.map(d => d.label), datasets: [{ data: vis.map(d => d.avg), backgroundColor: vis.map(d => d.color) }] },
+    data: { labels: vis.map(d => d.label), datasets: [{ data: vis.map(d => d.avg), backgroundColor: vis.map(d => d.color), borderRadius: 0 }] },
     options: barOpts('mW')
   });
 
   charts.lineAll = new Chart(document.getElementById('lineAll'), {
     type: 'line',
-    data: { datasets: vis.map(d => ({ label: d.label, data: d.samples, borderColor: d.color, pointRadius: 0, borderWidth: 1.5, tension: 0.2, fill: false })) },
+    data: { datasets: vis.map(d => ({ label: d.label, data: d.samples, borderColor: d.color, pointRadius: 0, borderWidth: 1.2, tension: 0.2, fill: false })) },
     options: {
       responsive: true,
       scales: {
-        x: { type: 'linear', title: { display: true, text: 'Seconds', color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } },
-        y: { title: { display: true, text: 'mW', color: '#888' }, ticks: { color: '#888' }, grid: { color: '#2a2a4a' } }
+        x: { type: 'linear', title: { display: true, text: 'Seconds', color: '#7a7394' }, ticks: { color: '#7a7394' }, grid: { color: '#2c2541' } },
+        y: { title: { display: true, text: 'mW', color: '#7a7394' }, ticks: { color: '#7a7394' }, grid: { color: '#2c2541' } }
       },
-      plugins: { legend: { labels: { color: '#e0e0e0' } } }
+      plugins: { legend: { labels: { color: '#c5bfd6', boxWidth: 10, padding: 8, font: { size: 10 } } } }
     }
   });
 
@@ -175,20 +196,20 @@ function rebuild() {
     const pb = phase.browsers.filter(b => enabled.has(b.label));
     charts['facet'+i] = new Chart(document.getElementById('facet'+i), {
       type: 'bar',
-      data: { labels: pb.map(b => b.label), datasets: [{ data: pb.map(b => b.total), backgroundColor: pb.map(b => b.color) }] },
+      data: { labels: pb.map(b => b.label), datasets: [{ data: pb.map(b => b.total), backgroundColor: pb.map(b => b.color), borderRadius: 0 }] },
       options: {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          x: { ticks: { color: '#888', font: { size: 10 } }, grid: { display: false } },
-          y: { ticks: { color: '#888' }, grid: { color: '#2a2a4a' } }
+          x: { ticks: { color: '#7a7394', font: { size: 9 } }, grid: { display: false } },
+          y: { ticks: { color: '#7a7394' }, grid: { color: '#2c2541' } }
         }
       }
     });
   });
 }
 
-document.querySelector('.toolbar').addEventListener('change', (e) => {
+document.querySelector('.fixed').addEventListener('change', (e) => {
   const label = e.target.dataset.browser;
   if (e.target.checked) enabled.add(label); else enabled.delete(label);
   rebuild();
