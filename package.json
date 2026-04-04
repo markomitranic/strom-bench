@@ -1,0 +1,17 @@
+{
+	"name": "strom-bench",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"benchmark": "bun run src/benchmark.ts",
+		"lint": "biome check .",
+		"format": "biome format --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.10",
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	}
+}
