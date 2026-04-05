@@ -23,15 +23,11 @@
  * | 12 | Food delivery          | 2 min    | Google → Wolt/similar, find sushi, browse items    |
  * | 13 | Discord                | 1 min    | Switch between 2-3 static channels, scroll history |
  * | 14 | GitHub                 | 1.5 min  | Google → repo, browse code, open a PR/diff         |
- * | 15 | PDF reading            | 1 min    | Open PDF from this repo in browser, scroll, read   |
- * | 16 | Reddit                 | 1.5 min  | Google → subreddit, scroll, open threads           |
+ * | 15 | PDF reading            | 1 min    | Google → ANOUR price list, scroll 20p, read        |
+ * | 16 | Hackernews             | 1.5 min  | Google → hackernews scroll, open threads           |
  * | 17 | Pinterest              | 1.5 min  | Google → search, scroll image grid, open pins      |
  *
- * Login requirements: Google (Meet, Sheets, Translate, AI), Notion, Discord, GitHub.
- * YouTube Shorts works logged-in via Google. Reddit and Pinterest may work without login.
- *
- * The PDF file is committed to this repo so it's identical across all test runs.
- * All specific URLs, prompts, and search terms to be filled in before the benchmark run.
+ * Login requirements: Google, Notion, Discord.
  */
 export const ACTION_PHASES = [
 	// Video & calls block (no PiP)
