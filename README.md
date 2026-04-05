@@ -20,10 +20,10 @@ Runs until you press Ctrl+C. Writes `recordings/chrome.csv`.
 
 ```bash
 bun install
-bun run src/benchmark.ts
+bun run src/generate.ts
 ```
 
-Reads all CSVs in `recordings/` and generates `recordings/benchmark.html` — bar charts, overlaid time series, and per-action-phase breakdowns.
+Reads all CSVs in `recordings/` and generates `recordings/report.html` — bar charts, overlaid time series, and per-action-phase breakdowns.
 
 ## Test methodology
 

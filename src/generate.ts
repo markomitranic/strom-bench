@@ -220,8 +220,8 @@ rebuild();
 </body>
 </html>`;
 
-const outPath = join(dir, "benchmark.html");
+const outPath = join(dir, "report.html");
 await Bun.write(outPath, html);
-console.log(`Benchmark report written to ${outPath}`);
+console.log(`Report written to ${outPath}`);
 
 Bun.spawn(["open", outPath]);

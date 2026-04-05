@@ -15,7 +15,7 @@ Results from the original version: https://medium.com/homullus/8-browsers-in-a-t
 sudo ./measure.sh <label>
 
 # Generate comparison report across all recordings
-bun run src/benchmark.ts
+bun run src/generate.ts
 
 # Lint/format
 bun run lint
@@ -27,7 +27,7 @@ bun run format
 **Measurement** (`measure.sh`): Bash script that pipes `powermetrics` output through grep/sed to extract Combined Power (CPU+GPU+ANE) in milliwatts, writing one `timestamp,mw` line per second to `recordings/<label>.csv`.
 
 **Analysis** (TypeScript/Bun):
-- `src/benchmark.ts` — Reads all CSVs from `recordings/`, generates `recordings/benchmark.html` with comparison bar charts, overlaid line charts, and per-action-phase faceted charts.
+- `src/generate.ts` — Reads all CSVs from `recordings/`, generates `recordings/report.html` with comparison bar charts, overlaid line charts, and per-action-phase faceted charts.
 - `src/scenario.ts` — Exports action phase time window definitions (placeholder 12-step test route).
 
 **Data format**: CSV with no header, `<unix_timestamp>,<milliwatts>` per line. Label derived from filename, sequential second from line number.
