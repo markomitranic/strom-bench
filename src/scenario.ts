@@ -15,10 +15,9 @@
  * | 05 | Start PiP              | 30s      | Open playlist (TBD), pop into PiP                  |
  * |    | **Browsing with PiP**  |          | *Background video decode + audio running*           |
  * | 06 | Google AI              | 1 min    | Type specific prompt into Google AI Overview       |
- * | 07 | Google Sheets          | 1 min    | Open existing sheet, scroll, edit cells            |
  * | 08 | Google Maps            | 2 min    | Search address, zoom, 3D, Street View, navigate   |
+ * | 07 | Google Sheets          | 1 min    | Open existing sheet, scroll, edit cells            |
  * | 09 | News article           | 30s      | Google → news site, scroll article, copy URL       |
- * | 10 | Google Translate       | 1 min    | New tab, paste URL into Translate, read page       |
  * | 11 | E-commerce             | 2 min    | Google → site, category, filters, product, gallery |
  * | 12 | Food delivery          | 2 min    | Google → Wolt/similar, find sushi, browse items    |
  * | 13 | Discord                | 1 min    | Switch between 2-3 static channels, scroll history |
@@ -31,23 +30,27 @@
  */
 export const ACTION_PHASES = [
 	// Video & calls block (no PiP)
-	{ name: "01. Notion", endSecond: 60 },
-	{ name: "02. YouTube 4K HDR", endSecond: 180 },
-	{ name: "03. YouTube Shorts", endSecond: 270 },
-	{ name: "04. Google Meet", endSecond: 360 },
+	{ name: "01. Notion", endSecond: timetoSeconds("1:03") },
+	{ name: "02. YouTube 4K HDR", endSecond: timetoSeconds("3:18") },
+	{ name: "03. YouTube Shorts", endSecond: timetoSeconds("4:28") },
+	{ name: "04. Google Meet", endSecond: timetoSeconds("5:54") },
 	// PiP starts — YouTube playlist, stays on for all remaining phases
-	{ name: "05. Start PiP", endSecond: 390 },
+	{ name: "05. Start PiP", endSecond: timetoSeconds("6:30") },
 	// Browsing with PiP (background video decode + audio)
-	{ name: "06. Google AI", endSecond: 450 },
-	{ name: "07. Google Sheets", endSecond: 510 },
-	{ name: "08. Google Maps", endSecond: 630 },
-	{ name: "09. News article", endSecond: 660 },
-	{ name: "10. Google Translate", endSecond: 720 },
-	{ name: "11. E-commerce", endSecond: 840 },
-	{ name: "12. Food delivery", endSecond: 960 },
-	{ name: "13. Discord", endSecond: 1020 },
-	{ name: "14. GitHub", endSecond: 1110 },
-	{ name: "15. PDF reading", endSecond: 1170 },
-	{ name: "16. Reddit", endSecond: 1260 },
-	{ name: "17. Pinterest", endSecond: 1350 },
+	{ name: "06. Google AI", endSecond: timetoSeconds("7:22") },
+	{ name: "08. Google Maps", endSecond: timetoSeconds("8:40") },
+	{ name: "07. Google Sheets", endSecond: timetoSeconds("9:42") },
+	{ name: "09. News article", endSecond: timetoSeconds("11:25") },
+	{ name: "11. E-commerce", endSecond: timetoSeconds("12:28") },
+	{ name: "12. Food delivery", endSecond: timetoSeconds("13:08") },
+	{ name: "13. Discord", endSecond: timetoSeconds("13:54") },
+	{ name: "14. GitHub", endSecond: timetoSeconds("14:37") },
+	{ name: "15. PDF reading", endSecond: timetoSeconds("15:31") },
+	{ name: "16. Reddit", endSecond: timetoSeconds("16:19") },
+	{ name: "17. Pinterest", endSecond: timetoSeconds("17:16") },
 ] as const;
+
+function timetoSeconds(time: string): number {
+	const [minutes, seconds] = time.split(":").map(Number);
+	return minutes * 60 + seconds;
+}
